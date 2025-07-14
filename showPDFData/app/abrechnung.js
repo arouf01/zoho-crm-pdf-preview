@@ -74,6 +74,9 @@
       NBU,
       BVG,
       KTG,
+      Kinderzulage,
+      Spesen,
+      Sonstiges,
     } = getMitarbeiterData;
 
     // Calculation Of Fields
@@ -97,7 +100,7 @@
     let KTGPercentage =
       parseFloat(((BRUTTOLOHNII * KTG) / 100).toFixed(2)) || 0.0;
 
-    // Total
+    // Total TOTALAbzüge
     let TOTALAbzüge =
       AHVPercentage +
         ALVPercentage +
@@ -105,6 +108,15 @@
         BVGPercentage +
         KTGPercentage || 0.0;
     let NETTOLOHNI = (BRUTTOLOHNII - TOTALAbzüge).toFixed(2) || 0.0;
+
+    // Total NETTOLOHN II
+    let TotalNETTOLOHNII =
+      parseFloat(Kinderzulage || 0) +
+      parseFloat(Spesen || 0) +
+      parseFloat(Sonstiges || 0);
+
+    let NETTOLOHNII = parseFloat(NETTOLOHNI || 0) + TotalNETTOLOHNII;
+
     // Inject Abrechnung HTML
     const html = `
   <section class="mb-6">
@@ -198,22 +210,22 @@
       <tr>
         <td class="py-1 px-4">+ Kinderzulage</td>
         <td></td><td></td>
-        <td class="text-right px-4">1.00</td>
+        <td class="text-right px-4">${Kinderzulage || 0.0}</td>
       </tr>
       <tr>
-        <td class="py-1 px-4">+ Spesen</td>
+        <td class="py-1 px-4"> + Spesen</td>
         <td></td><td></td>
-        <td class="text-right px-4">0.00</td>
+        <td class="text-right px-4">${Spesen || 0.0}</td>
       </tr>
       <tr>
         <td class="py-1 px-4">./. Sonstiges</td>
         <td></td><td></td>
-        <td class="text-right px-4">0.00</td>
+        <td class="text-right px-4">${Sonstiges || 0.0}</td>
       </tr>
       <tr class="font-semibold">
         <td class="py-1 px-4">NETTOLOHN II</td>
         <td></td><td></td>
-        <td class="text-right px-4">202.76</td>
+        <td class="text-right px-4">${NETTOLOHNII}</td>
       </tr>
     </tbody>
   </table>
