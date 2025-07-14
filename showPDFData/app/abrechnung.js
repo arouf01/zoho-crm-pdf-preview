@@ -69,6 +69,11 @@
       Ort,
       Bonus_Bemerkung,
       Bonus,
+      AHV,
+      ALV,
+      NBU,
+      BVG,
+      KTG,
     } = getMitarbeiterData;
 
     // Calculation Of Fields
@@ -81,6 +86,25 @@
       BRUTTOLOHNI - (stornoreserve + stornoEffektiv)
     ).toFixed(2);
 
+    let AHVPercentage =
+      parseFloat(((BRUTTOLOHNII * AHV) / 100).toFixed(2)) || 0.0;
+    let ALVPercentage =
+      parseFloat(((BRUTTOLOHNII * ALV) / 100).toFixed(2)) || 0.0;
+    let NBUPercentage =
+      parseFloat(((BRUTTOLOHNII * NBU) / 100).toFixed(2)) || 0.0;
+    let BVGPercentage =
+      parseFloat(((BRUTTOLOHNII * BVG) / 100).toFixed(2)) || 0.0;
+    let KTGPercentage =
+      parseFloat(((BRUTTOLOHNII * KTG) / 100).toFixed(2)) || 0.0;
+
+    // Total
+    let TOTALAbzüge =
+      AHVPercentage +
+        ALVPercentage +
+        NBUPercentage +
+        BVGPercentage +
+        KTGPercentage || 0.0;
+    let NETTOLOHNI = (BRUTTOLOHNII - TOTALAbzüge).toFixed(2) || 0.0;
     // Inject Abrechnung HTML
     const html = `
   <section class="mb-6">
@@ -133,43 +157,43 @@
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. AHV</td>
-        <td class="text-right px-4">5.3%</td>
-        <td class="text-right px-4">215.55</td>
-        <td class="text-right px-4">-11.42</td>
+        <td class="text-right px-4">${AHV}%</td>
+        <td class="text-right px-4">${BRUTTOLOHNII}</td>
+        <td class="text-right px-4"> - ${AHVPercentage}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. ALV</td>
-        <td class="text-right px-4">1.1%</td>
-        <td class="text-right px-4">215.55</td>
-        <td class="text-right px-4">-2.37</td>
+        <td class="text-right px-4">${ALV}%</td>
+        <td class="text-right px-4">${BRUTTOLOHNII}</td>
+        <td class="text-right px-4"> - ${ALVPercentage}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. NBU</td>
-        <td class="text-right px-4">0%</td>
-        <td class="text-right px-4">215.55</td>
-        <td class="text-right px-4">-0.00</td>
+        <td class="text-right px-4">${NBU}%</td>
+        <td class="text-right px-4">${BRUTTOLOHNII}</td>
+        <td class="text-right px-4"> - ${NBUPercentage}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. BVG</td>
-        <td class="text-right px-4">0%</td>
-        <td class="text-right px-4">215.55</td>
-        <td class="text-right px-4">-0.00</td>
+        <td class="text-right px-4">${BVG}%</td>
+        <td class="text-right px-4">${BRUTTOLOHNII}</td>
+        <td class="text-right px-4"> - ${BVGPercentage}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. KTG</td>
-        <td class="text-right px-4">0%</td>
-        <td class="text-right px-4">215.55</td>
-        <td class="text-right px-4">-0.00</td>
+        <td class="text-right px-4">${KTG}%</td>
+        <td class="text-right px-4">${BRUTTOLOHNII}</td>
+        <td class="text-right px-4"> - ${KTGPercentage}</td>
       </tr>
       <tr class="border-b font-semibold">
         <td class="py-1 px-4">TOTAL Abzüge</td>
         <td></td><td></td>
-        <td class="text-right px-4">-13.79</td>
+        <td class="text-right px-4"> - ${TOTALAbzüge}</td>
       </tr>
       <tr class="border-b font-semibold">
         <td class="py-1 px-4">NETTOLOHN I</td>
         <td></td><td></td>
-        <td class="text-right px-4">201.76</td>
+        <td class="text-right px-4">${NETTOLOHNI}</td>
       </tr>
       <tr>
         <td class="py-1 px-4">+ Kinderzulage</td>
