@@ -10,7 +10,7 @@
   }
 })(() => {
   ZOHO.embeddedApp.on("PageLoad", async (data) => {
-    ZOHO.CRM.UI.Resize({ height: "800", width: "100%" });
+    ZOHO.CRM.UI.Resize({ height: "800", width: "80%" });
 
     // Get Deals Details
     let getDealsDetails = await ZOHO.CRM.API.getRecord({
@@ -57,12 +57,29 @@
       return `${day}.${month}.${year}`;
     };
 
-    // Get Fields
-    let {} = getDealsData;
+    // Get Fields from Deal
+    let { Provision_inkl_Storno } = getDealsData;
 
-    // For Mitarbeiter
-    let { Vorname, Nachname, Strasse_Hausnummer, PLZ, Ort } =
-      getMitarbeiterData;
+    // For Fields Form Mitarbeiter
+    let {
+      Vorname,
+      Nachname,
+      Strasse_Hausnummer,
+      PLZ,
+      Ort,
+      Bonus_Bemerkung,
+      Bonus,
+    } = getMitarbeiterData;
+
+    // Calculation Of Fields
+    let BRUTTOLOHNI = Provision_inkl_Storno + Bonus;
+    let stornoreserve = `${((Provision_inkl_Storno + Bonus) * 0.15).toFixed(
+      2
+    )}`;
+    let stornoEffektiv = 0.0;
+    let BRUTTOLOHNII = parseFloat(
+      BRUTTOLOHNI - (stornoreserve + stornoEffektiv)
+    ).toFixed(2);
 
     // Inject Abrechnung HTML
     const html = `
@@ -86,33 +103,33 @@
       <tr class="border-b">
         <td class="py-1 px-4">Total gemäss Umsatzliste</td>
         <td></td><td></td>
-        <td class="text-right px-4">253.80</td>
+        <td class="text-right px-4">${Provision_inkl_Storno || 0.0}</td>
       </tr>
       <tr class="border-b">
-        <td class="py-1 px-4">+ Bonus</td>
+        <td class="py-1 px-4">+ Bonus ${Bonus_Bemerkung || "NA"}</td>
         <td></td><td></td>
-        <td class="text-right px-4">0.00</td>
+        <td class="text-right px-4"> ${Bonus || 0.0}</td>
       </tr>
       <tr class="border-b font-semibold">
         <td class="py-1 px-4">BRUTTOLOHN I (gemäss Umsatzliste)</td>
         <td></td><td></td>
-        <td class="text-right px-4">253.80</td>
+        <td class="text-right px-4">${BRUTTOLOHNI}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. Stornoreserve</td>
         <td class="text-right px-4">15%</td>
         <td></td>
-        <td class="text-right px-4">-38.25</td>
+        <td class="text-right px-4"> - ${stornoreserve}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. Storno effektiv</td>
         <td></td><td></td>
-        <td class="text-right px-4">-0.00</td>
+        <td class="text-right px-4"> - ${stornoEffektiv}</td>
       </tr>
       <tr class="border-b font-semibold">
         <td class="py-1 px-4">BRUTTOLOHN II (AHV-Lohn)</td>
         <td></td><td></td>
-        <td class="text-right px-4">215.55</td>
+        <td class="text-right px-4">${BRUTTOLOHNII}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. AHV</td>
