@@ -10,7 +10,7 @@
   }
 })(() => {
   ZOHO.embeddedApp.on("PageLoad", async (data) => {
-    ZOHO.CRM.UI.Resize({ height: "800", width: "80%" });
+    ZOHO.CRM.UI.Resize({ height: "90%", width: "70%" });
 
     // Get Deals Details
     let getDealsDetails = await ZOHO.CRM.API.getRecord({
@@ -58,7 +58,7 @@
     };
 
     // Get Fields from Deal
-    let { Provision_inkl_Storno } = getDealsData;
+    let { Provision_inkl_Storno, Punktewert_Kalk } = getDealsData;
 
     // For Fields Form Mitarbeiter
     let {
@@ -77,13 +77,18 @@
       Kinderzulage,
       Spesen,
       Sonstiges,
+      IBAN_f_r_Auszahlungen,
+      Total_Stornokonto,
+      Total_Punkte,
+      Differenz_zur_n_chsten_Stufe,
+      N_chste_St_fe,
     } = getMitarbeiterData;
 
-    // Calculation Of Fields
+    /* Start Calculation */
     let BRUTTOLOHNI = Provision_inkl_Storno + Bonus;
-    let stornoreserve = `${((Provision_inkl_Storno + Bonus) * 0.15).toFixed(
-      2
-    )}`;
+    let stornoreserve = parseFloat(
+      ((Provision_inkl_Storno + Bonus) * 0.15).toFixed(2)
+    );
     let stornoEffektiv = 0.0;
     let BRUTTOLOHNII = parseFloat(
       BRUTTOLOHNI - (stornoreserve + stornoEffektiv)
@@ -116,6 +121,18 @@
       parseFloat(Sonstiges || 0);
 
     let NETTOLOHNII = parseFloat(NETTOLOHNI || 0) + TotalNETTOLOHNII;
+    let TotalStornokonto = parseFloat(Total_Stornokonto) || 0.0;
+    let SaldoStornokontoNeu =
+      parseFloat((TotalStornokonto + stornoreserve).toFixed(2)) || 0.0;
+
+    let PunktewertKalk = parseFloat(Punktewert_Kalk) || 0.0;
+    let TotalPunkte = parseFloat(Total_Punkte) || 0.0;
+    let PunkteSaldoNeu =
+      parseFloat((PunktewertKalk + TotalPunkte).toFixed(2)) || 0.0;
+
+    let DifferenzZurNChstenStufe =
+      parseFloat(Differenz_zur_n_chsten_Stufe) || 0.0;
+    /* End Calculation */
 
     // Inject Abrechnung HTML
     const html = `
@@ -230,16 +247,16 @@
     </tbody>
   </table>
 
-  <p class="mb-1">Auszahlung auf folgendes Konto: <strong>CH06 8080 8008 4576 0556 6</strong></p>
+  <p class="mb-1">Auszahlung auf folgendes Konto: <strong>${IBAN_f_r_Auszahlungen}</strong></p>
 
   <div class="mb-6 mt-4">
-    <p>Storno diesen Monat: <strong>38.25</strong></p>
-    <p>Saldo Stornokonto alt: <strong>7341.19</strong></p>
-    <p>Saldo Stornokonto neu: <strong>7379.44</strong></p>
-    <p>Punkte diesen Monat: <strong>5.64</strong></p>
-    <p>Punkte Saldo alt: <strong>0.00</strong></p>
-    <p>Punkte Saldo neu: <strong>5.64</strong></p>
-    <p>Diff. zur nächsten Stufe: <strong>16000 (Wirtschaftsberater 5)</strong></p>
+    <p>Storno diesen Monat: <strong>${stornoreserve}</strong></p>
+    <p>Saldo Stornokonto alt: <strong>${TotalStornokonto}</strong></p>
+    <p>Saldo Stornokonto neu: <strong>${SaldoStornokontoNeu}</strong></p>
+    <p>Punkte diesen Monat: <strong>${PunktewertKalk}</strong></p>
+    <p>Punkte Saldo alt: <strong>${TotalPunkte}</strong></p>
+    <p>Punkte Saldo neu: <strong>${PunkteSaldoNeu}</strong></p>
+    <p>Diff. zur nächsten Stufe: <strong>${DifferenzZurNChstenStufe} (${N_chste_St_fe})</strong></p>
   </div>
 
   <footer class="text-sm border-t pt-2 text-center text-gray-700 mb-8">
