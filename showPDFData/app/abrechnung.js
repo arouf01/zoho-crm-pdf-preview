@@ -12,6 +12,8 @@
   ZOHO.embeddedApp.on("PageLoad", async (data) => {
     ZOHO.CRM.UI.Resize({ height: "90%", width: "70%" });
 
+    console.log(data);
+
     // Get Deals Details
     let getDealsDetails = await ZOHO.CRM.API.getRecord({
       Entity: `${data?.Entity}`,
@@ -58,7 +60,14 @@
     };
 
     // Get Fields from Deal
-    let { Provision_inkl_Storno, Punktewert_Kalk } = getDealsData;
+    let {
+      Provision_inkl_Storno,
+      Punktewert_Kalk,
+      Contact_Name,
+      Gesellschaft,
+      Closing_Date,
+      Stornowert_in_CHF,
+    } = getDealsData;
 
     // For Fields Form Mitarbeiter
     let {
@@ -258,6 +267,51 @@
     <p>Punkte Saldo neu: <strong>${PunkteSaldoNeu}</strong></p>
     <p>Diff. zur nächsten Stufe: <strong>${DifferenzZurNChstenStufe} (${N_chste_St_fe})</strong></p>
   </div>
+
+
+<h2 class="text-lg font-semibold mb-2 mt-8">
+  Übersicht provisionierte Verträge (Umsatzliste)
+</h2>
+
+<table class="table-fixed w-full mb-6 border border-collapse border-gray-400 text-sm break-words">
+  <thead class="bg-gray-100">
+    <tr>
+      <th class="border px-2 py-1 text-left break-words w-1/6">Kontakt</th>
+      <th class="border px-2 py-1 text-left break-words w-1/6">Gesellschaft</th>
+      <th class="border px-2 py-1 text-left break-words w-1/6">Abschluss</th>
+      <th class="border px-2 py-1 text-left break-words w-1/6">CHF/Punkt</th>
+      <th class="border px-2 py-1 text-left break-words w-1/6">Storno</th>
+      <th class="border px-2 py-1 text-left break-words w-1/6">Provision</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="border px-2 py-1 break-words">${
+        Contact_Name?.name || "NA"
+      }</td>
+      <td class="border px-2 py-1 break-words">${
+        Gesellschaft?.name || "NA"
+      }</td>
+      <td class="border px-2 py-1 break-words">${Closing_Date || "NA"}</td>
+      <td class="border px-2 py-1 break-words">${PunktewertKalk}</td>
+      <td class="border px-2 py-1 break-words">${Stornowert_in_CHF || 0.0}</td>
+      <td class="border px-2 py-1 break-words">${
+        Provision_inkl_Storno || 0.0
+      }</td>
+    </tr>
+  </tbody>
+  <tfoot class="font-semibold">
+    <tr>
+      <td class="border px-2 py-1 break-words" colspan="3">Total</td>
+      <td class="border px-2 py-1 break-words">${PunktewertKalk}</td>
+      <td class="border px-2 py-1 break-words">${Stornowert_in_CHF || 0.0}</td>
+      <td class="border px-2 py-1 break-words">${
+        Provision_inkl_Storno || 0.0
+      }</td>
+    </tr>
+  </tfoot>
+</table>
+
 
   <footer class="text-sm border-t pt-2 text-center text-gray-700 mb-8">
     L&M Finance AG - Zugerstrasse 16 - 6330 Cham
