@@ -28,9 +28,52 @@
   <body class="bg-gray-50 font-sans">
     <!-- Abrechnung Section -->
     <div
-      id="abrechnung"
       class="bg-white text-sm text-gray-900 font-serif p-8 max-w-3xl mx-auto my-8"
-    ></div>
+    >
+      <!-- Table 1 -->
+      <div id="abrechnung"></div>
+
+      <!-- Table 2 -->
+      <h2 class="text-lg font-semibold mt-10 mb-2">
+        Übersicht provisionierte Verträge (Umsatzliste)
+      </h2>
+
+      <table
+        class="w-full border border-collapse border-gray-400 text-sm break-words"
+      >
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="border px-4 py-1 text-left break-words w-1/6">
+              Kontakt
+            </th>
+            <th class="border px-4 py-1 text-left break-words w-1/6">
+              Gesellschaft
+            </th>
+            <th class="border px-4 py-1 text-left break-words w-1/6">
+              Abschluss
+            </th>
+            <th class="border px-4 py-1 text-left break-words w-1/6">
+              CHF/Punkt
+            </th>
+            <th class="border px-4 py-1 text-left break-words w-1/6">Storno</th>
+            <th class="border px-4 py-1 text-left break-words w-1/6">
+              Provision
+            </th>
+          </tr>
+        </thead>
+        <tbody id="dynamicTableBody">
+          <!-- Dynamic rows will be inserted here -->
+        </tbody>
+        <tfoot class="font-semibold">
+          <tr>
+            <td class="border px-4 py-1 break-words" colspan="3">Total</td>
+            <td class="border px-4 py-1 break-words" id="sumPunkte">0</td>
+            <td class="border px-4 py-1 break-words" id="sumStorno">0</td>
+            <td class="border px-4 py-1 break-words" id="sumProvision">0</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
