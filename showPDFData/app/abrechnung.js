@@ -1,4 +1,4 @@
-// Load Zoho SDK if not already included
+// Load Zoho SDK
 (function loadZohoSdk(callback) {
   if (typeof ZOHO === "undefined") {
     const script = document.createElement("script");
@@ -11,6 +11,15 @@
 })(() => {
   ZOHO.embeddedApp.on("PageLoad", async (data) => {
     ZOHO.CRM.UI.Resize({ height: "90%", width: "70%" });
+
+    // Format Date
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
+    };
 
     // Loop for all the selected Deals
     let tbody = document.getElementById("dynamicTableBody");
@@ -41,7 +50,7 @@
       // Fallbacks and formatting
       let kontakt = Contact_Name?.name || "NA";
       let gesellschaft = Gesellschaft?.name || "NA";
-      let abschluss = Closing_Date || "NA";
+      let abschluss = formatDate(Closing_Date) || "NA";
       let chfPunkt = parseFloat(Punktewert_Kalk || 0);
       let storno = parseFloat(Stornowert_in_CHF || 0);
       let provision = parseFloat(Provision_inkl_Storno || 0);
@@ -49,13 +58,20 @@
       // Append table row
       let row = document.createElement("tr");
       row.innerHTML = `
-    <td class="border px-2 py-1 break-words">${kontakt}</td>
-    <td class="border px-2 py-1 break-words">${gesellschaft}</td>
-    <td class="border px-2 py-1 break-words">${abschluss}</td>
-    <td class="border px-2 py-1 break-words">${chfPunkt.toFixed(2)}</td>
-    <td class="border px-2 py-1 break-words">${storno.toFixed(2)}</td>
-    <td class="border px-2 py-1 break-words">${provision.toFixed(2)}</td>
-  `;
+  <td class="border px-2 py-1 break-words text-left align-middle">${kontakt}</td>
+  <td class="border px-2 py-1 break-words text-left align-middle">${gesellschaft}</td>
+  <td class="border px-2 py-1 break-words text-left align-middle">${abschluss}</td>
+  <td class="border px-4 py-1 break-words text-right align-middle">${chfPunkt.toFixed(
+    2
+  )}</td>
+  <td class="border px-4 py-1 break-words text-right align-middle">${storno.toFixed(
+    2
+  )}</td>
+  <td class="border px-4 py-1 break-words text-right align-middle">${provision.toFixed(
+    2
+  )}</td>
+`;
+
       tbody.appendChild(row);
 
       // Add to totals
@@ -139,6 +155,7 @@
       Total_Punkte,
       Differenz_zur_n_chsten_Stufe,
       N_chste_St_fe,
+      Storno_in,
     } = getMitarbeiterData;
 
     /* Start Calculation */
@@ -167,30 +184,38 @@
     const stornoEffektiv = match ? parseFloat(match.Sornowert || 0) : 0.0;
 
     let BRUTTOLOHNII = parseFloat(
-      BRUTTOLOHNI - (sumStorno + stornoEffektiv)
+      BRUTTOLOHNI - (Math.abs(sumStorno) + Math.abs(stornoEffektiv))
     ).toFixed(2);
 
-    let AHVPercentage =
-      parseFloat(((BRUTTOLOHNII * AHV) / 100).toFixed(2)) || 0.0;
-    let ALVPercentage =
-      parseFloat(((BRUTTOLOHNII * ALV) / 100).toFixed(2)) || 0.0;
-    let NBUPercentage =
-      parseFloat(((BRUTTOLOHNII * NBU) / 100).toFixed(2)) || 0.0;
-    let BVGPercentage =
-      parseFloat(((BRUTTOLOHNII * BVG) / 100).toFixed(2)) || 0.0;
-    let KTGPercentage =
-      parseFloat(((BRUTTOLOHNII * KTG) / 100).toFixed(2)) || 0.0;
+    let AHVPercentage = 0.0;
+    let ALVPercentage = 0.0;
+    let NBUPercentage = 0.0;
+    let KTGPercentage = 0.0;
+    let getBVG = 0.0;
+    let TOTALAbzüge = 0.0;
 
+    if (BRUTTOLOHNII >= 0) {
+      AHVPercentage =
+        parseFloat(((BRUTTOLOHNII * AHV) / 100).toFixed(2)) || 0.0;
+      ALVPercentage =
+        parseFloat(((BRUTTOLOHNII * ALV) / 100).toFixed(2)) || 0.0;
+      NBUPercentage =
+        parseFloat(((BRUTTOLOHNII * NBU) / 100).toFixed(2)) || 0.0;
+      KTGPercentage =
+        parseFloat(((BRUTTOLOHNII * KTG) / 100).toFixed(2)) || 0.0;
+      getBVG = BVG;
+      TOTALAbzüge =
+        (
+          AHVPercentage +
+          ALVPercentage +
+          NBUPercentage +
+          BVG +
+          KTGPercentage
+        ).toFixed(2) || 0.0;
+    }
     // Total TOTALAbzüge
-    let TOTALAbzüge =
-      (
-        AHVPercentage +
-        ALVPercentage +
-        NBUPercentage +
-        BVGPercentage +
-        KTGPercentage
-      ).toFixed(2) || 0.0;
-    let NETTOLOHNI = (BRUTTOLOHNII - TOTALAbzüge).toFixed(2) || 0.0;
+
+    let NETTOLOHNI = (BRUTTOLOHNII - Math.abs(TOTALAbzüge)).toFixed(2) || 0.0;
 
     // Total NETTOLOHN II
     let TotalNETTOLOHNII =
@@ -238,7 +263,7 @@
       <tr class="border-b">
         <td class="py-1 px-4">+ Bonus ${Bonus_Bemerkung || "NA"}</td>
         <td></td><td></td>
-        <td class="text-right px-4"> ${Bonus || 0.0}</td>
+        <td class="text-right px-4"> ${parseFloat(Bonus || 0.0).toFixed(2)}</td>
       </tr>
       <tr class="border-b font-semibold">
         <td class="py-1 px-4">BRUTTOLOHN I (gemäss Umsatzliste)</td>
@@ -247,14 +272,16 @@
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. Stornoreserve</td>
-        <td class="text-right px-4">15%</td>
+        <td class="text-right px-4">${Storno_in}%</td>
         <td></td>
         <td class="text-right px-4"> - ${sumStorno.toFixed(2)}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. Storno effektiv</td>
         <td></td><td></td>
-        <td class="text-right px-4 text-red-500"> - ${stornoEffektiv}</td>
+        <td class="text-right px-4 text-red-500"> - ${stornoEffektiv.toFixed(
+          2
+        )}</td>
       </tr>
       <tr class="border-b font-semibold">
         <td class="py-1 px-4">BRUTTOLOHN II (AHV-Lohn)</td>
@@ -265,79 +292,104 @@
         <td class="py-1 px-4">./. AHV</td>
         <td class="text-right px-4">${AHV}%</td>
         <td class="text-right px-4">${BRUTTOLOHNII}</td>
-        <td class="text-right px-4"> - ${AHVPercentage}</td>
+        <td class="text-right px-4"> - ${AHVPercentage.toFixed(2)}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. ALV</td>
         <td class="text-right px-4">${ALV}%</td>
         <td class="text-right px-4">${BRUTTOLOHNII}</td>
-        <td class="text-right px-4"> - ${ALVPercentage}</td>
+        <td class="text-right px-4"> - ${ALVPercentage.toFixed(2)}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. NBU</td>
         <td class="text-right px-4">${NBU}%</td>
         <td class="text-right px-4">${BRUTTOLOHNII}</td>
-        <td class="text-right px-4"> - ${NBUPercentage}</td>
+        <td class="text-right px-4"> - ${NBUPercentage.toFixed(2)}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. BVG</td>
-        <td class="text-right px-4">${BVG}%</td>
-        <td class="text-right px-4">${BRUTTOLOHNII}</td>
-        <td class="text-right px-4"> - ${BVGPercentage}</td>
+        <td class="text-right px-4"></td>
+        <td class="text-right px-4"></td>
+        <td class="text-right px-4"> - ${getBVG.toFixed(2)}</td>
       </tr>
       <tr class="border-b">
         <td class="py-1 px-4">./. KTG</td>
         <td class="text-right px-4">${KTG}%</td>
         <td class="text-right px-4">${BRUTTOLOHNII}</td>
-        <td class="text-right px-4"> - ${KTGPercentage}</td>
+        <td class="text-right px-4"> - ${KTGPercentage.toFixed(2)}</td>
       </tr>
       <tr class="border-b font-semibold">
         <td class="py-1 px-4">TOTAL Abzüge</td>
         <td></td><td></td>
-        <td class="text-right px-4"> - ${TOTALAbzüge}</td>
+        <td class="text-right px-4"> - ${parseFloat(TOTALAbzüge).toFixed(
+          2
+        )}</td>
       </tr>
       <tr class="border-b font-semibold">
         <td class="py-1 px-4">NETTOLOHN I</td>
         <td></td><td></td>
-        <td class="text-right px-4">${NETTOLOHNI}</td>
+        <td class="text-right px-4">${parseFloat(NETTOLOHNI).toFixed(2)}</td>
       </tr>
       <tr>
         <td class="py-1 px-4">+ Kinderzulage</td>
         <td></td><td></td>
-        <td class="text-right px-4">${Kinderzulage || 0.0}</td>
+        <td class="text-right px-4">${parseFloat(Kinderzulage || 0.0).toFixed(
+          2
+        )}</td>
       </tr>
       <tr>
         <td class="py-1 px-4"> + Spesen</td>
         <td></td><td></td>
-        <td class="text-right px-4">${Spesen || 0.0}</td>
+        <td class="text-right px-4">${parseFloat(Spesen || 0.0).toFixed(2)}</td>
       </tr>
       <tr>
         <td class="py-1 px-4">./. Sonstiges</td>
         <td></td><td></td>
-        <td class="text-right px-4">${Sonstiges || 0.0}</td>
+        <td class="text-right px-4">${(parseFloat(Sonstiges) || 0.0).toFixed(
+          2
+        )}</td>
       </tr>
       <tr class="font-semibold">
         <td class="py-1 px-4">NETTOLOHN II</td>
         <td></td><td></td>
-        <td class="text-right px-4">${NETTOLOHNII}</td>
+        <td class="text-right px-4">${parseFloat(NETTOLOHNII).toFixed(2)}</td>
       </tr>
     </tbody>
   </table>
 
-  <p class="mb-1">Auszahlung auf folgendes Konto: <strong>${IBAN_f_r_Auszahlungen}</strong></p>
+<div class="grid grid-cols-2 gap-y-1 gap-x-16 justify-items-start text-sm w-fit">
 
-  <div class="mb-6 mt-4">
-    <p>Storno diesen Monat: <strong>${sumStorno}</strong></p>
-    <p>Saldo Stornokonto alt: <strong>${TotalStornokonto}</strong></p>
-    <p>Saldo Stornokonto neu: <strong>${SaldoStornokontoNeu}</strong></p>
-    <p>Punkte diesen Monat: <strong>${sumPunkte.toFixed(2)}</strong></p>
-    <p>Punkte Saldo alt: <strong>${TotalPunkte}</strong></p>
-    <p>Punkte Saldo neu: <span class="text-red-500"><strong>${PunkteSaldoNeu}</strong></span></p>
-    <p>Diff. zur nächsten Stufe: <strong>${DifferenzZurNChstenStufe || 0.0} (${
-      N_chste_St_fe || "NA"
-    })</strong></p>
+  <div>Auszahlung auf folgendes Konto:</div>
+  <div class="text-right font-semibold">${IBAN_f_r_Auszahlungen || "NA"}</div>
+
+  <div>Storno diesen Monat:</div>
+  <div class="text-right font-semibold">${parseFloat(sumStorno).toFixed(
+    2
+  )}</div>
+
+  <div>Saldo Stornokonto alt:</div>
+  <div class="text-right font-semibold">${TotalStornokonto}</div>
+
+  <div>Saldo Stornokonto neu:</div>
+  <div class="text-right font-semibold">${SaldoStornokontoNeu}</div>
+
+  <div>Punkte diesen Monat:</div>
+  <div class="text-right font-semibold">${sumPunkte.toFixed(2)}</div>
+
+  <div>Punkte Saldo alt:</div>
+  <div class="text-right font-semibold">${TotalPunkte}</div>
+
+  <div>Punkte Saldo neu:</div>
+  <div class="text-right text-red-500 font-semibold">${PunkteSaldoNeu}</div>
+
+  <div>Diff. zur nächsten Stufe:</div>
+  <div class="text-right font-semibold">
+    ${DifferenzZurNChstenStufe || 0.0}
+    (${N_chste_St_fe || "NA"})
   </div>
+</div>
 
+  </div>
 `;
 
     document.getElementById("abrechnung").innerHTML = html;

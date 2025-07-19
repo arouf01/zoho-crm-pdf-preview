@@ -43,33 +43,69 @@
       >
         <thead class="bg-gray-100">
           <tr>
-            <th class="border px-4 py-1 text-left break-words w-1/6">
+            <th
+              class="border px-4 py-1 break-words w-1/6 text-left align-middle"
+            >
               Kontakt
             </th>
-            <th class="border px-4 py-1 text-left break-words w-1/6">
+            <th
+              class="border px-4 py-1 break-words w-1/6 text-left align-middle"
+            >
               Gesellschaft
             </th>
-            <th class="border px-4 py-1 text-left break-words w-1/6">
+            <th
+              class="border px-4 py-1 break-words w-1/6 text-left align-middle"
+            >
               Abschluss
             </th>
-            <th class="border px-4 py-1 text-left break-words w-1/6">
+            <th
+              class="border px-4 py-1 break-words w-1/6 text-right align-middle"
+            >
               CHF/Punkt
             </th>
-            <th class="border px-4 py-1 text-left break-words w-1/6">Storno</th>
-            <th class="border px-4 py-1 text-left break-words w-1/6">
+            <th
+              class="border px-4 py-1 break-words w-1/6 text-right align-middle"
+            >
+              Storno
+            </th>
+            <th
+              class="border px-4 py-1 break-words w-1/6 text-right align-middle"
+            >
               Provision
             </th>
           </tr>
         </thead>
+
         <tbody id="dynamicTableBody">
-          <!-- Dynamic rows will be inserted here -->
+          <!-- Dynamic rows go here; be sure they also include align-middle -->
         </tbody>
+
         <tfoot class="font-semibold">
           <tr>
-            <td class="border px-4 py-1 break-words" colspan="3">Total</td>
-            <td class="border px-4 py-1 break-words" id="sumPunkte">0</td>
-            <td class="border px-4 py-1 break-words" id="sumStorno">0</td>
-            <td class="border px-4 py-1 break-words" id="sumProvision">0</td>
+            <td
+              class="border px-4 py-1 break-words text-left align-middle"
+              colspan="3"
+            >
+              Total
+            </td>
+            <td
+              class="border px-4 py-1 break-words text-right align-middle"
+              id="sumPunkte"
+            >
+              0
+            </td>
+            <td
+              class="border px-4 py-1 break-words text-right align-middle"
+              id="sumStorno"
+            >
+              0
+            </td>
+            <td
+              class="border px-4 py-1 break-words text-right align-middle"
+              id="sumProvision"
+            >
+              0
+            </td>
           </tr>
         </tfoot>
       </table>
